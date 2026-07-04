@@ -8,9 +8,13 @@ export const MQTT_TOPICS = {
 }
 
 export function createMqttClient() {
-  const protocol = import.meta.env.VITE_MQTT_PROTOCOL || "ws"
   const host = import.meta.env.VITE_HIVEMQ_HOST || "broker.hivemq.com"
-  const port = import.meta.env.VITE_HIVEMQ_WS_PORT || "8000"
+
+  const defaultProtocol = typeof window !== "undefined" && window.location.protocol === "https:" ? "wss" : "ws"
+  const protocol = import.meta.env.VITE_MQTT_PROTOCOL || defaultProtocol
+
+  const defaultPort = protocol === "wss" ? "8884" : "8000"
+  const port = import.meta.env.VITE_HIVEMQ_WS_PORT || defaultPort
   const username = import.meta.env.VITE_HIVEMQ_USERNAME
   const password = import.meta.env.VITE_HIVEMQ_PASSWORD
 
