@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model DoorState {
+  id        String   @id @default("main")
+  status    String   @default("locked")
+  command   String   @default("idle")
+  online    Boolean  @default(false)
+  lastSeen  DateTime? @map("last_seen")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("door_states")
+}
+
+model RfidCard {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  uid       String   @unique
+  name      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("rfid_cards")
+}
+
+model AccessLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  uid       String
+  status    String
+  cardName  String?  @map("card_name")
+  time      String?
+  date      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([uid])
+  @@map("access_logs")
+}

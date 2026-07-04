@@ -1,6 +1,5 @@
 import { useState } from "react"
-import { db } from "../firebase"
-import { ref, push, remove, update } from "firebase/database"
+import { supabase } from "../lib/supabase"
 import toast from "react-hot-toast"
 import { CreditCard, Trash2, Edit2, Plus, Check, X } from "lucide-react"
 
@@ -42,10 +41,11 @@ export default function RFIDManager({ cards }) {
     }
 
     try {
-      await push(ref(db, "smart-door-lock/cards"), {
+      const { error } = await supabase.from("rfid_cards").insert({
         uid: uid.toUpperCase(),
         name
       })
+      if (error) throw error
       toast.success("Kartu RFID berhasil ditambahkan.")
       setNewUID("")
       setNewName("")
@@ -59,7 +59,8 @@ export default function RFIDManager({ cards }) {
   const deleteCard = async (id) => {
     if (!confirm("Hapus kartu ini?")) return
     try {
-      await remove(ref(db, `smart-door-lock/cards/${id}`))
+      const { error } = await supabase.from("rfid_cards").delete().eq("id", id)
+      if (error) throw error
       toast.success("Kartu berhasil dihapus.")
     } catch (error) {
       console.error("Failed to delete card:", error)
@@ -75,7 +76,11 @@ export default function RFIDManager({ cards }) {
     }
 
     try {
-      await update(ref(db, `smart-door-lock/cards/${id}`), { name })
+      const { error } = await supabase
+        .from("rfid_cards")
+        .update({ name, updated_at: new Date().toISOString() })
+        .eq("id", id)
+      if (error) throw error
       toast.success("Nama kartu berhasil diperbarui.")
       setEditId(null)
     } catch (error) {

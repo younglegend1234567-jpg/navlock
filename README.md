@@ -1,18 +1,63 @@
-# React + Vite
+# NavLock
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Smart door lock ESP32 + React dashboard dengan HiveMQ untuk MQTT realtime dan Supabase PostgreSQL untuk database.
 
-Currently, two official plugins are available:
+## Setup Supabase
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Buat project Supabase.
+2. Salin `.env.example` menjadi `.env`, lalu isi:
+   - `DATABASE_URL`
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_HIVEMQ_HOST`
+   - `VITE_HIVEMQ_WS_PORT`
+3. Push schema Prisma ke Supabase:
 
-## React Compiler
+```bash
+npx prisma db push
+```
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Schema ada di `prisma/schema.prisma` dengan table:
+- `door_states`
+- `rfid_cards`
+- `access_logs`
 
-Note: This will impact Vite dev & build performances.
+## Setup HiveMQ
 
-## Expanding the ESLint configuration
+Gunakan HiveMQ public broker:
+- MQTT ESP32: `broker.hivemq.com`, port `1883`
+- MQTT WebSocket dashboard: `broker.hivemq.com`, port `8000`, path `/mqtt`
+- Username/password dikosongkan.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Topic yang dipakai:
+- `navlock/variruujpdsivihzfcjo/door/command`
+- `navlock/variruujpdsivihzfcjo/door/status`
+- `navlock/variruujpdsivihzfcjo/door/online`
+- `navlock/variruujpdsivihzfcjo/access/log`
+
+## Setup Arduino
+
+Install library Arduino:
+- `MFRC522`
+- `PubSubClient`
+- `ArduinoJson`
+
+Edit `arduino/code.ino`:
+- `WIFI_SSID`
+- `WIFI_PASSWORD`
+- `HIVEMQ_HOST`
+- `SUPABASE_URL`
+- `SUPABASE_ANON_KEY`
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+Build production:
+
+```bash
+npm run build
+```
